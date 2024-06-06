@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BsX as BinIcon } from "react-icons/bs";
 import {
   BsFillCheckCircleFill as FilledCheckIcon,
@@ -10,34 +10,53 @@ import { todoInterface } from "@/helpers/interfaces";
 import { errorToast } from "@/helpers/toasts";
 import { deleteTodo, updateTodo } from "@/app/actions";
 import { auth } from "../../app/firebase/config";
+import { TodoContext } from "@/store/TodoContext";
+import { useContext } from "react";
+import { ThreeDotsSpinner } from "../UI/LoadingSpinners";
 
 interface propsTypes {
   todo: todoInterface;
-  fetchTodos: () => void;
 }
-const ListItem: React.FC<propsTypes> = ({ todo, fetchTodos }) => {
+const ListItem: React.FC<propsTypes> = ({ todo }) => {
   const [user] = useAuthState(auth);
+  const { todos, getTodos } = useContext(TodoContext);
+  const [cloading, setCloading] = useState(false);
+  const [dloading, setDloading] = useState(false);
 
   const handleCompletion = async () => {
     try {
+      setCloading(true);
       if (user?.uid) {
         await updateTodo(user.uid, { ...todo, isCompleted: !todo.isCompleted });
-        fetchTodos();
+        if (user?.uid) {
+          getTodos(user?.uid);
+        }
       }
+      setCloading(false);
     } catch (error: any) {
       errorToast(error?.message);
     }
   };
   const handleDeletion = async () => {
     try {
+      setDloading(true);
       if (user?.uid) {
         await deleteTodo(user.uid, todo.id);
-        fetchTodos();
+        if (user?.uid) {
+          getTodos(user?.uid);
+        }
       }
+      setDloading(false);
     } catch (error: any) {
       errorToast(error?.message);
     }
   };
+
+  const completionButton = todo.isCompleted ? (
+    <FilledCheckIcon size={20} className="text-orange-500 " />
+  ) : (
+    <EmptyCheckIcon size={20} className="hover:text-orange-500" />
+  );
 
   return (
     <div className=" flex py-2 justify-between font-medium ">
@@ -45,11 +64,7 @@ const ListItem: React.FC<propsTypes> = ({ todo, fetchTodos }) => {
         onClick={handleCompletion}
         className="self-center cursor-pointer mt-1"
       >
-        {todo.isCompleted ? (
-          <FilledCheckIcon size={20} className="text-orange-500 " />
-        ) : (
-          <EmptyCheckIcon size={20} className="hover:text-orange-500" />
-        )}
+        {completionButton}
       </div>
       <div className="  flex justify-between ml-1">
         <div
@@ -57,7 +72,8 @@ const ListItem: React.FC<propsTypes> = ({ todo, fetchTodos }) => {
             todo.isCompleted ? "line-through" : ""
           } `}
         >
-          {todo.text}
+          {!cloading && !dloading && todo.text}
+          {(cloading || dloading) && <ThreeDotsSpinner />}
         </div>
       </div>
       <div

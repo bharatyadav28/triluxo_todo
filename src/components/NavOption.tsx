@@ -2,19 +2,23 @@ import Link from "next/link";
 import { useSignOut } from "react-firebase-hooks/auth";
 
 import { auth } from "@/app/firebase/config";
+import { TodoContext } from "@/store/TodoContext";
+import { useContext } from "react";
 
 interface propsType {
   userId: string | undefined;
   email: string | undefined | null;
-  fetchTodos: () => void;
 }
 
-const NavOption: React.FC<propsType> = ({ userId, email, fetchTodos }) => {
+const NavOption: React.FC<propsType> = ({ userId, email }) => {
   const [signOut, loading, error] = useSignOut(auth);
+  const { getTodos } = useContext(TodoContext);
 
   const handleLogout = async () => {
     const success = await signOut();
-    fetchTodos();
+    if (userId) {
+      getTodos(userId);
+    }
   };
 
   const isLoggedIn = userId ? true : false;

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const useHttp = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
   const dbConnect = async (
     { path, method, payload }: any,

@@ -5,15 +5,14 @@ import Tooltip from "./Tooltip";
 import { addTodo } from "@/app/actions";
 import { auth } from "../app/firebase/config";
 import { errorToast } from "@/helpers/toasts";
+import { TodoContext } from "@/store/TodoContext";
+import { useContext } from "react";
 
-interface propsType {
-  fetchTodos: () => void;
-}
-
-const AddNewTodo: React.FC<propsType> = ({ fetchTodos }) => {
+const AddNewTodo = () => {
   const todoInputRef = useRef<HTMLInputElement>(null);
   const [user, loading, error] = useAuthState(auth);
   const uid = user?.uid;
+  const { todos, getTodos } = useContext(TodoContext);
 
   let notLogged = !uid;
 
@@ -23,7 +22,9 @@ const AddNewTodo: React.FC<propsType> = ({ fetchTodos }) => {
     if (todoValue && uid) {
       try {
         const result = await addTodo(uid, todoValue);
-        fetchTodos();
+        if (uid) {
+          getTodos(uid);
+        }
       } catch (error: any) {
         errorToast(error.message);
       }

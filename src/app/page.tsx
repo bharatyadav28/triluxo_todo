@@ -10,34 +10,26 @@ import { todoInterface } from "../helpers/interfaces";
 import NavOption from "../components/NavOption";
 
 import { auth } from "./firebase/config";
-import useHttp from "@/hooks/use-http";
 import { errorToast } from "@/helpers/toasts";
+import { TodoContext } from "@/store/TodoContext";
+import { useContext } from "react";
+import { TriangleSpinner } from "@/components/UI/LoadingSpinners";
 
 export default function Home() {
   const [user, loading] = useAuthState(auth);
-  const [todos, setTodos] = useState<todoInterface[] | []>([]);
-  const [refetch, setRefetch] = useState(true);
-
-  const { dbConnect, isLoading, error: fetchError, setError } = useHttp();
+  const { todos, getTodos, error, setError, isFetching } =
+    useContext(TodoContext);
 
   useEffect(() => {
-    const postRequest = (data: any) => {
-      if (data) {
-        setTodos(data.todos);
-      }
-    };
-    if (user?.uid && refetch) {
-      dbConnect({ path: `/api/todos?uid=${user.uid}` }, postRequest);
-      setRefetch(false);
-    } else if (!user?.uid && refetch) {
-      setTodos([]);
+    if (user?.uid) {
+      getTodos(user?.uid);
     }
-  }, [user, refetch]);
+  }, [user]);
 
   useEffect(() => {
-    if (fetchError) {
-      errorToast(fetchError);
-      setError(null);
+    if (error) {
+      errorToast(error);
+      setError("");
     }
   });
 
@@ -50,39 +42,23 @@ export default function Home() {
 
   return (
     <>
-      <NavOption
-        userId={user?.uid}
-        email={user?.email}
-        fetchTodos={() => {
-          setRefetch(true);
-        }}
-      />
+      <NavOption userId={user?.uid} email={user?.email} />
       <Card className="bg-transparent mt-6">
         <div className="font-bold text-2xl mb-5 flex align-middle">
           <h1 className="mr-2 ml-4">To-do List </h1>
           <ListIcon className="mt-1 text-orange-300" />
         </div>
 
-        <AddNewTodo
-          fetchTodos={() => {
-            setRefetch(true);
-          }}
-        />
+        <AddNewTodo />
         <div className="flex-col  mt-8 mx-1">
-          <List
-            todos={pendingTodos}
-            fetchTodos={() => {
-              setRefetch(true);
-            }}
-          />
-          <hr className="pt-2 mt-3 mr-5 mb-0 " />
-
-          <List
-            todos={completedTodos}
-            fetchTodos={() => {
-              setRefetch(true);
-            }}
-          />
+          {!isFetching && (
+            <>
+              <List todos={pendingTodos} />
+              <hr className="pt-2 mt-3 mr-5 mb-0 " />
+              <List todos={completedTodos} />{" "}
+            </>
+          )}
+          {isFetching && <TriangleSpinner />}
         </div>
       </Card>
     </>
