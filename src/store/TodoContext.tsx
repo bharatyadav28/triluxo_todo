@@ -7,6 +7,7 @@ interface contextType {
   isFetching: boolean;
   error: string;
   setError: (error: string) => void;
+  emptyTodos: () => void;
 }
 const defaultValue = {
   todos: [],
@@ -14,5 +15,6 @@ const defaultValue = {
   isFetching: false,
   error: "",
   setError: (error: string) => {},
+  emptyTodos: () => {},
 };
 export const TodoContext = createContext<contextType>(defaultValue);

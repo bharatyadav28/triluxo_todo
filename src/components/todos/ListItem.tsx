@@ -58,14 +58,17 @@ const ListItem: React.FC<propsTypes> = ({ todo }) => {
     <EmptyCheckIcon size={20} className="hover:text-orange-500" />
   );
 
+  const isDisabled = cloading || dloading;
+
   return (
     <div className=" flex py-2 justify-between font-medium ">
-      <div
+      <button
         onClick={handleCompletion}
-        className="self-center cursor-pointer mt-1"
+        className="self-center cursor-pointer mt-1 disabled:cursor-not-allowed"
+        disabled={isDisabled}
       >
         {completionButton}
-      </div>
+      </button>
       <div className="  flex justify-between ml-1">
         <div
           className={`text-slate-700 font-medium  ${
@@ -76,12 +79,13 @@ const ListItem: React.FC<propsTypes> = ({ todo }) => {
           {(cloading || dloading) && <ThreeDotsSpinner />}
         </div>
       </div>
-      <div
+      <button
         onClick={handleDeletion}
-        className="hover:text-orange-500 hover:cursor-pointer ml-2 "
+        className="hover:text-orange-500 hover:cursor-pointer ml-2  disabled:cursor-not-allowed"
+        disabled={isDisabled}
       >
         <BinIcon size={20} />
-      </div>
+      </button>
     </div>
   );
 };

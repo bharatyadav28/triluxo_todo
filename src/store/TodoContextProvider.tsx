@@ -22,9 +22,13 @@ const TodoContextProvider: React.FC<PropsType> = ({ children }) => {
     await dbConnect({ path: `/api/todos?uid=${userId}` }, postRequest);
   };
 
+  const emptyTodos = () => {
+    setTodos([]);
+  };
+
   return (
     <TodoContext.Provider
-      value={{ todos, getTodos, isFetching, error, setError }}
+      value={{ todos, getTodos, isFetching, error, setError, emptyTodos }}
     >
       {children}
     </TodoContext.Provider>

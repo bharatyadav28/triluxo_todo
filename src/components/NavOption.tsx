@@ -12,12 +12,12 @@ interface propsType {
 
 const NavOption: React.FC<propsType> = ({ userId, email }) => {
   const [signOut, loading, error] = useSignOut(auth);
-  const { getTodos } = useContext(TodoContext);
+  const { getTodos, emptyTodos } = useContext(TodoContext);
 
   const handleLogout = async () => {
-    const success = await signOut();
     if (userId) {
-      getTodos(userId);
+      await signOut();
+      emptyTodos();
     }
   };
 
